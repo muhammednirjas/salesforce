@@ -1,0 +1,20 @@
+trigger ClosedOpportunityTrigger on Opportunity (after insert,after update) {
+     
+    List<Opportunity> toProcess = null;
+    switch on Trigger.operationType {
+        when AFTER_INSERT {
+        // All inserted Accounts will need the Opportunity, so there is no need to perform the query
+            toProcess = Trigger.New;
+        }
+        when AFTER_UPDATE {
+            toProcess = Trigger.New;
+        }
+    }
+    for(Opportunity opp : Trigger.New){
+        Task tsk = new Task();
+        tsk.Subject = 'Follow Up Test Task' ;
+        tsk.WhatId = opp.Id;
+        insert tsk;
+    }
+
+}
