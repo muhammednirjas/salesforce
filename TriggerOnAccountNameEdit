@@ -1,0 +1,16 @@
+trigger relatedContact on Account (before update) {
+    
+    for(Account acc : Trigger.New){
+        
+        if(Trigger.isBefore && Trigger.isUpdate){
+            for(Account accNewValue : Trigger.New){
+                       Account accOldValue = Trigger.oldMap.get(accNewValue.Id);
+                if(accNewValue.Name != accOldValue.Name){
+                    accNewValue.addError('Account name should not be edited');
+                }
+            }
+        }
+    }
+
+
+}
