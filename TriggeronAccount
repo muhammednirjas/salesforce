@@ -1,0 +1,16 @@
+trigger case1 on Account (before insert) {
+ //While user creating an account, 
+ //if annual revenue provided by user is less than 1000 ,
+ // then write a logic to throw an error to user
+    if(Trigger.isBefore && Trigger.isInsert){
+        for(Account acc : Trigger.new){
+            if(acc.AnnualRevenue < 1000){
+                acc.addError('annual revenue should be greater than 1000');
+            }
+        }
+    }
+ 
+    
+    
+    
+}
