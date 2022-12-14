@@ -1,0 +1,35 @@
+trigger AccountTrigger on Account (after update) {
+ //On user updating an account record , if billing address is changed , update all its child 
+ //contact mail address field same as account billing adress? 
+  //first step : to get all account with billing street is changed
+   set<Id> accRecWithBillingAdressChanged = new Set<Id>();
+    if(Trigger.isAfter && Trigger.isUpdate){
+       
+        for(Account accNew : Trigger.New){
+            Account accOld = Trigger.oldMap.get(accNew.Id);
+            if(accNew.BillingStreet != accOld.BillingStreet){
+                accRecWithBillingAdressChanged.add(accNew.Id);
+            }
+        }
+        
+    }
+   //second step: query the account and all contacts
+   //with id in the set list
+   //loop through each Account and give inner loop
+   //through which loop through all contact
+   //update billing adress of all contact items with account items
+   List<Account> accWithContacts = [Select id ,BillingStreet,(SELECT id, MailingStreet from Contacts) from Account WHERE ID in: accRecWithBillingAdressChanged];
+   List<Contact> conToBeUpdated = new List<Contact>();
+    for(Account acc : accWithContacts){
+        List<Contact> consOfTheLoopedAccount = acc.contacts; 
+        for(Contact con: consOfTheLoopedAccount){
+            con.MailingStreet = acc.BillingStreet;
+             conToBeUpdated.add(con);
+        }
+        
+        UPDATE conToBeUpdated;
+    }
+    
+    
+    
+ }
