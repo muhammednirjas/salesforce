@@ -1,0 +1,46 @@
+trigger totalContactsOnAccount on Contact (after insert,after update ,after delete , after undelete) {
+   
+//new set of id's to store all all account id's
+//new list of account for filnal update
+//loop through all new contact and get all account id's and storeit in set
+   Set<Id> setAccountIds = new Set<Id>();
+    List<Account> finalAccountListUpdate = new List<Account>();
+    if(Trigger.isAfter){
+        if(Trigger.isUpdate || Trigger.isInsert || Trigger.isUnDelete){
+            for(Contact c : Trigger.New){
+                if(c.AccountId != null){
+                    setAccountIds.add(c.AccountId);
+                    if(Trigger.isUpdate){
+                        if(Trigger.oldMap.get(c.Id).AccountId  != c.AccountId){
+                            setAccountIds.add(Trigger.oldMap.get(c.Id).AccountId);
+                        }
+                    }
+                }
+            }
+        }
+    }
+           if(Trigger.isDelete){
+            for(Contact c : Trigger.Old)
+                if(c.AccountId != null){
+                    setAccountIds.add(c.AccountId);
+                }
+                }
+    
+    System.debug('account Ids' + setAccountIds);
+    
+  
+    List<Account> nestedAccount = 
+        [Select id,Name, Total_Contacts__c,(Select id, Name From Contacts) from Account where id in :setAccountIds];
+    
+    for(Account acc : nestedAccount){
+        List<Contact> conList = acc.Contacts;
+      //conList.add(acc.Contacts);
+        acc.Total_Contacts__c = conList.Size();
+        finalAccountListUpdate.add(acc);
+    } try{
+        upsert   finalAccountListUpdate;
+    } catch(System.Exception e){
+        System.debug(e.getMessage());
+    }
+            
+}
