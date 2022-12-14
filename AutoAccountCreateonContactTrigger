@@ -1,0 +1,20 @@
+trigger AutoAccountCreate on Contact (before insert) {
+    //List<Account> accList = new List<Account>();
+    //List<Contact> conList = new List<Contact>();
+    for(Contact cc : Trigger.New){
+        if(cc.AccountId == null){
+            Account acc = new Account();
+            acc.Name = 'Trigger Account ' + cc.LastName;
+         //   accList.add(acc);
+            insert acc;
+           // System.debug(acc.Id);
+           // cc.AccountId =0 acc.Id;
+            cc.AccountId = acc.Id;
+        //    conList.add(cc);
+            
+        }
+        //update conList ;
+      //  sYST.debug(conList);
+    }
+
+}
